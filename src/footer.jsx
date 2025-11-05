@@ -13,7 +13,7 @@ const Footer = () => {
                    target="_blank">Codecademy</a> |
                 <a href="https://www.linkedin.com/in/yoeltecleab" rel="noopener noreferrer"
                    target="_blank">LinkedIn</a> |
-                <span>Built by <a href="yoeldesignsinc.com/">Yoel Designs &copy; 2025</a></span>
+                <span>Built by Yoel Designs &copy; 2025</span>
             </nav>
         </footer>
     )
