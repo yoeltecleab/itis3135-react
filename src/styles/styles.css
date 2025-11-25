@@ -5,14 +5,20 @@
     --background2-darker: rgb(222, 237, 251);
 }
 
+/* Ensure the gradient covers the entire page and does not restart when the page is long */
 html, body {
     height: 100%;
+    min-height: 100%;
+    margin: 0;
+    /* Put the gradient on the root so it spans the full document height */
+    /* keep gradient fixed relative to viewport */
+    background: linear-gradient(120deg, #f8fafc 0%, var(--background1) 100%) no-repeat fixed;
+    background-size: cover; /* ensure it covers long pages */
 }
 
 body {
     font-family: 'Inter', 'Segoe UI', 'Roboto', Arial, sans-serif;
-    margin: 0;
-    background: linear-gradient(120deg, #f8fafc 0%, var(--background1) 100%);
+    /* margin removed above */
     color: #23272f;
     min-height: 100vh;
     letter-spacing: 0.01em;
@@ -810,6 +816,9 @@ h3 {
     margin-top: 48px;
     margin-bottom: 24px;
     padding-bottom: 12px;
+}
+
+hr {
     border-bottom: 3px solid #3b82f6;
 }
 
@@ -878,4 +887,224 @@ section figure figcaption {
 section ul li ul li {
     font-size: 1.05rem;
     margin-bottom: 8px;
+}
+
+/* ---- Student viewer and controls (added) ---- */
+.student-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 12px 16px;
+    border-radius: 14px;
+    box-shadow: 0 6px 30px rgba(30, 41, 59, 0.06);
+    margin: 0 auto 18px auto;
+    max-width: 900px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+}
+
+.control-label {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.95rem;
+    min-width: 60px;
+    text-align: left;
+}
+
+.search-input, .jump-input, .select-input {
+    border: 2px solid #e6eefc;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.06);
+    font-size: 1rem;
+    color: #0f172a;
+}
+
+.search-input::placeholder, .jump-input::placeholder {
+    color: #94a3b8;
+}
+
+.search-input:focus, .jump-input:focus, .select-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.12);
+}
+
+.nav-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 8px 28px rgba(59, 130, 246, 0.14);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.nav-button:hover, .nav-button:focus {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(59, 130, 246, 0.18);
+}
+
+.nav-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 20px auto 12px auto;
+    max-width: 700px;
+}
+
+.nav-counter {
+    font-weight: 700;
+    color: #334155;
+    background: rgba(59, 130, 246, 0.06);
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+
+.student-viewer {
+    margin: 0 auto 28px auto;
+    max-width: 900px;
+    padding: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(246, 249, 255, 0.8) 100%);
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(30, 41, 59, 0.07);
+}
+
+.student-card {
+    text-align: left;
+    padding: 12px 8px 0 8px;
+}
+
+.student-name {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.student-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 14px 0;
+}
+
+.student-figure img {
+    width: 260px;
+    height: auto;
+    border-radius: 18px;
+    box-shadow: 0 8px 36px rgba(30, 41, 59, 0.10);
+}
+
+.no-image {
+    width: 260px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    border-radius: 18px;
+    box-shadow: 0 8px 36px rgba(30, 41, 59, 0.06);
+    font-weight: 700;
+}
+
+.personal-statement {
+    font-style: italic;
+    color: #102a43;
+    margin: 10px 0 14px 0;
+    line-height: 1.6;
+}
+
+.background-list {
+    background: rgba(255, 255, 255, 0.85);
+    padding: 18px 20px;
+    border-radius: 12px;
+    list-style: none;
+    box-shadow: 0 6px 24px rgba(30, 41, 59, 0.04);
+}
+
+.background-list > li {
+    margin-bottom: 10px;
+    color: #1e293b;
+}
+
+.controls-meta {
+    margin-left: auto;
+    color: #334155;
+}
+
+.no-results {
+    color: #7f8ca3;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.error {
+    color: #b91c1c;
+    background: rgba(254, 226, 226, 0.6);
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.nav-controls-bottom {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+    .student-controls {
+        max-width: 95%;
+    }
+
+    .student-viewer {
+        max-width: 95%;
+        padding: 14px;
+    }
+
+    .student-figure img, .no-image {
+        width: 90vw;
+        max-width: 320px;
+        height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .control-label {
+        display: none;
+    }
+
+    .controls-meta {
+        display: none;
+    }
+
+    .nav-controls {
+        gap: 8px;
+    }
+
+    .search-input, .jump-input, .select-input {
+        font-size: 0.95rem;
+    }
 }
