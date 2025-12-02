@@ -13,6 +13,26 @@ export default function Class_Intros() {
     // jump to input (string because user types)
     const [jumpValue, setJumpValue] = useState("");
 
+    // display mode: "slideshow" or "all"
+    const [displayMode, setDisplayMode] = useState("slideshow");
+
+    // field visibility toggles
+    const [showFields, setShowFields] = useState({
+        name: true,
+        image: true,
+        personalStatement: true,
+        personalBackground: true,
+        professionalBackground: true,
+        academicBackground: true,
+        subjectBackground: true,
+        primaryComputer: true,
+        courses: true
+    });
+
+    function toggleField(field) {
+        setShowFields((prev) => ({...prev, [field]: !prev[field]}));
+    }
+
     useEffect(() => {
         fetch("https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1")
             .then((response) => {
@@ -58,9 +78,10 @@ export default function Class_Intros() {
         });
     }, [filtered]);
 
-    // keyboard navigation: left / right
+    // keyboard navigation: left / right (only in slideshow mode)
     useEffect(() => {
         function onKey(e) {
+            if (displayMode !== "slideshow") return;
             if (filtered.length === 0) return;
             if (e.key === "ArrowLeft") {
                 setFilteredIndex((i) => (i - 1 + filtered.length) % filtered.length);
@@ -71,7 +92,7 @@ export default function Class_Intros() {
 
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [filtered]);
+    }, [filtered, displayMode]);
 
     function prev() {
         if (filtered.length === 0) return;
@@ -103,11 +124,182 @@ export default function Class_Intros() {
 
     const current = filtered.length > 0 ? filtered[filteredIndex] : null;
 
+    // render a single student card based on field visibility
+    function renderStudentCard(student, index = null) {
+        return (
+            <article key={index} className="student-card">
+                {showFields.name && (
+                    <h3 className="student-name">
+                        {((student["name"] && student["name"]["first"]) || "") + " "}
+                        {student["name"] && student["name"]["middleInitial"] ? student["name"]["middleInitial"] + " " : ""}
+                        {((student["name"] && student["name"]["last"]) || "") + " "}
+                        {student["divider"] ? student["divider"] + " " : ""}
+                        {student["mascot"] ? student["mascot"] : ""}
+                    </h3>
+                )}
+
+                {showFields.image && (
+                    <figure className="student-figure">
+                        {student["media"] && student["media"]["src"] ? (
+                            <img
+                                src={("https://dvonb.xyz" + student["media"]["src"])}
+                                alt={`Portrait of ${((student["name"] && student["name"]["first"]) || "")} ${((student["name"] && student["name"]["last"]) || "")}`}/>
+                        ) : (
+                            <div className="no-image">No image</div>
+                        )}
+                        <figcaption>{(student["media"] && student["media"]["caption"]) || ""}</figcaption>
+                    </figure>
+                )}
+
+                {showFields.personalStatement && student["personalStatement"] && (
+                    <p className="personal-statement">{student["personalStatement"]}</p>
+                )}
+
+                <ul className="background-list">
+                    {showFields.personalBackground && (student["backgrounds"] && student["backgrounds"]["personal"]) && (
+                        <li>
+                            <b>Personal Background: </b>{student["backgrounds"]["personal"]}
+                        </li>
+                    )}
+                    {showFields.professionalBackground && (student["backgrounds"] && student["backgrounds"]["professional"]) && (
+                        <li>
+                            <b>Professional Background: </b>{student["backgrounds"]["professional"]}
+                        </li>
+                    )}
+                    {showFields.academicBackground && (student["backgrounds"] && student["backgrounds"]["academic"]) && (
+                        <li>
+                            <b>Academic Background: </b>{student["backgrounds"]["academic"]}
+                        </li>
+                    )}
+                    {showFields.subjectBackground && (student["backgrounds"] && student["backgrounds"]["subject"]) && (
+                        <li>
+                            <b>Subject Background: </b>{student["backgrounds"]["subject"]}
+                        </li>
+                    )}
+                    {showFields.primaryComputer && (student["platform"] && student["platform"]["device"]) && (
+                        <li>
+                            <b>Primary Computer: </b>{student["platform"]["device"] + " - " + student["platform"]["os"]}
+                        </li>
+                    )}
+                    {showFields.courses && student["courses"] && student["courses"].length > 0 && (
+                        <li>
+                            <b>Courses: </b>
+                            <ul>
+                                {student["courses"].map((course, ci) =>
+                                    <li key={ci}>
+                                        <b>{((course["code"] || "").replace("-", "") + " - " + (course["name"] || "") + ": ")}</b>
+                                        {course["reason"] || ""}
+                                    </li>
+                                )}
+                            </ul>
+                        </li>
+                    )}
+                </ul>
+                <hr/>
+            </article>
+        );
+    }
+
     return (<>
         <main>
             <h2>Class Introductions</h2>
 
             {error && <p className="error">Error: {error}</p>}
+
+            {/* Display mode toggle */}
+            <div className="display-mode-controls">
+                <button
+                    className={`mode-button ${displayMode === "slideshow" ? "active" : ""}`}
+                    onClick={() => setDisplayMode("slideshow")}
+                >
+                    📊 Slideshow Mode
+                </button>
+                <button
+                    className={`mode-button ${displayMode === "all" ? "active" : ""}`}
+                    onClick={() => setDisplayMode("all")}
+                >
+                    📋 Display All
+                </button>
+            </div>
+
+            {/* Field visibility toggles */}
+            <details className="field-toggles">
+                <summary>⚙️ Toggle Fields</summary>
+                <div className="checkbox-grid">
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.name}
+                            onChange={() => toggleField("name")}
+                        />
+                        Show Name
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.image}
+                            onChange={() => toggleField("image")}
+                        />
+                        Show Image
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.personalStatement}
+                            onChange={() => toggleField("personalStatement")}
+                        />
+                        Show Personal Statement
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.personalBackground}
+                            onChange={() => toggleField("personalBackground")}
+                        />
+                        Show Personal Background
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.professionalBackground}
+                            onChange={() => toggleField("professionalBackground")}
+                        />
+                        Show Professional Background
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.academicBackground}
+                            onChange={() => toggleField("academicBackground")}
+                        />
+                        Show Academic Background
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.subjectBackground}
+                            onChange={() => toggleField("subjectBackground")}
+                        />
+                        Show Subject Background
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.primaryComputer}
+                            onChange={() => toggleField("primaryComputer")}
+                        />
+                        Show Primary Computer
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={showFields.courses}
+                            onChange={() => toggleField("courses")}
+                        />
+                        Show Courses
+                    </label>
+                </div>
+            </details>
 
             {/* Controls: search, jump input, select */}
             <div className="student-controls">
@@ -118,25 +310,30 @@ export default function Class_Intros() {
                            placeholder="Type a name (first, last, or both)"/>
                 </label>
 
-                <label className="control-group">
-                    <span className="control-label">Jump to #</span>
-                    <input aria-label="Jump to student number" className="jump-input" type="number" min="1"
-                           value={jumpValue}
-                           onChange={(e) => setJumpValue(e.target.value)}
-                           placeholder={filtered.length ? `1 - ${filtered.length}` : "-"}/>
-                    <button className="nav-button" onClick={doJump}>Go</button>
-                </label>
+                {displayMode === "slideshow" && (
+                    <>
+                        <label className="control-group">
+                            <span className="control-label">Jump to #</span>
+                            <input aria-label="Jump to student number" className="jump-input" type="number" min="1"
+                                   value={jumpValue}
+                                   onChange={(e) => setJumpValue(e.target.value)}
+                                   placeholder={filtered.length ? `1 - ${filtered.length}` : "-"}/>
+                            <button className="nav-button" onClick={doJump}>Go</button>
+                        </label>
 
-                <label className="control-group">
-                    <span className="control-label">Or select</span>
-                    <select aria-label="Jump to student by name" className="select-input" onChange={onSelectJump}
-                            value={filtered.length ? String(filteredIndex) : ""}>
-                        <option value="">-- choose --</option>
-                        {filtered.map((s, i) => (
-                            <option key={i} value={String(i)}>{i + 1}. {displayName(s)}</option>
-                        ))}
-                    </select>
-                </label>
+                        <label className="control-group">
+                            <span className="control-label">Or select</span>
+                            <select aria-label="Jump to student by name" className="select-input"
+                                    onChange={onSelectJump}
+                                    value={filtered.length ? String(filteredIndex) : ""}>
+                                <option value="">-- choose --</option>
+                                {filtered.map((s, i) => (
+                                    <option key={i} value={String(i)}>{i + 1}. {displayName(s)}</option>
+                                ))}
+                            </select>
+                        </label>
+                    </>
+                )}
 
                 <div className="controls-meta">
                     <small>{filtered.length} of {intros.length} students shown</small>
@@ -146,7 +343,8 @@ export default function Class_Intros() {
             {filtered.length === 0 && !error &&
                 <p className="no-results">No students found matching "{searchTerm}".</p>}
 
-            {current && (
+            {/* Slideshow mode: show one student at a time with navigation */}
+            {displayMode === "slideshow" && current && (
                 <section className="student-viewer">
                     <div className="nav-controls">
                         <button aria-label="Previous student" className="nav-button" onClick={prev}>← Prev</button>
@@ -154,66 +352,19 @@ export default function Class_Intros() {
                         <button aria-label="Next student" className="nav-button" onClick={next}>Next →</button>
                     </div>
 
-                    <article className="student-card">
-                        <h3 className="student-name">
-                            {((current["name"] && current["name"]["first"]) || "") + " "}
-                            {current["name"] && current["name"]["middleInitial"] ? current["name"]["middleInitial"] + " " : ""}
-                            {((current["name"] && current["name"]["last"]) || "") + " "}
-                            {current["divider"] ? current["divider"] + " " : ""}
-                            {current["mascot"] ? current["mascot"] : ""}
-                        </h3>
-                        <figure className="student-figure">
-                            {current["media"] && current["media"]["src"] ? (
-                                <img
-                                    src={("https://dvonb.xyz" + current["media"]["src"])}
-                                    alt={`Portrait of ${((current["name"] && current["name"]["first"]) || "")} ${((current["name"] && current["name"]["last"]) || "")}`}/>
-                            ) : (
-                                <div className="no-image">No image</div>
-                            )}
-
-                            <figcaption>{(current["media"] && current["media"]["caption"]) || ""}</figcaption>
-                        </figure>
-                        <p className="personal-statement">{current["personalStatement"] || ""}</p>
-                        <ul className="background-list">
-                            <li>
-                                <b>Personal
-                                    Background: </b>{(current["backgrounds"] && current["backgrounds"]["personal"]) || ""}
-                            </li>
-                            <li>
-                                <b>Professional
-                                    Background: </b>{(current["backgrounds"] && current["backgrounds"]["professional"]) || ""}
-                            </li>
-                            <li>
-                                <b>Academic
-                                    Background: </b>{(current["backgrounds"] && current["backgrounds"]["academic"]) || ""}
-                            </li>
-                            <li>
-                                <b>Subject
-                                    Background: </b>{(current["backgrounds"] && current["backgrounds"]["subject"]) || ""}
-                            </li>
-                            <li>
-                                <b>Primary
-                                    Computer: </b>{(current["platform"] && current["platform"]["device"] + " - " + current["platform"]["os"]) || ""}
-                            </li>
-                            <li>
-                                <b>Courses: </b>
-                                <ul>
-                                    {(current["courses"] || []).map((course, ci) =>
-                                        <li key={ci}>
-                                            <b>{((course["code"] || "").replace("-", "") + " - " + (course["name"] || "") + ": ")}</b>
-                                            {course["reason"] || ""}
-                                        </li>
-                                    )}
-                                </ul>
-                            </li>
-                        </ul>
-                        <hr/>
-                    </article>
+                    {renderStudentCard(current)}
 
                     <div className="nav-controls-bottom">
                         <button aria-label="Previous student" className="nav-button" onClick={prev}>← Prev</button>
                         <button aria-label="Next student" className="nav-button" onClick={next}>Next →</button>
                     </div>
+                </section>
+            )}
+
+            {/* Display All mode: show all students */}
+            {displayMode === "all" && filtered.length > 0 && (
+                <section className="all-students">
+                    {filtered.map((student, idx) => renderStudentCard(student, idx))}
                 </section>
             )}
 
